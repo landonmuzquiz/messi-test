@@ -2,18 +2,24 @@ import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
-async function main() {
-  // Idempotent: only seed when the table is empty so re-runs don't duplicate.
-  const count = await prisma.message.count();
-  if (count > 0) {
-    console.log(`Skipped seeding; ${count} message(s) already exist.`);
-    return;
-  }
+// The single message the app displays. Change this value to change the page.
+const DESIRED_TEXT = "Lamine Yamal";
 
-  const message = await prisma.message.create({
-    data: { text: "Lionel Messi" },
-  });
-  console.log(`Seeded message: "${message.text}"`);
+async function main() {
+  const first = await prisma.message.findFirst({ orderBy: { id: "asc" } });
+
+  if (!first) {
+    const created = await prisma.message.create({ data: { text: DESIRED_TEXT } });
+    console.log(`Seeded message: "${created.text}"`);
+  } else if (first.text !== DESIRED_TEXT) {
+    const updated = await prisma.message.update({
+      where: { id: first.id },
+      data: { text: DESIRED_TEXT },
+    });
+    console.log(`Updated message ${updated.id} to "${updated.text}"`);
+  } else {
+    console.log(`Message already "${DESIRED_TEXT}"; nothing to do.`);
+  }
 }
 
 main()
