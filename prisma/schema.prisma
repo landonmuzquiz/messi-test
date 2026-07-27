@@ -7,7 +7,7 @@ generator client {
 datasource db {
   provider  = "postgresql"
   url       = env("DATABASE_URL") // pooled connection, used at runtime
-  directUrl = env("DIRECT_URL") // direct connection, used by prisma migrate
+  directUrl = env("DATABASE_URL_UNPOOLED") // direct connection (Neon), used by prisma migrate
 }
 
 model Message {
